@@ -1,0 +1,108 @@
+name: Build and deploy to ECS
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Prepare the version to release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      # - name: Get latest image version
+      #   id: get_latest_version
+      #   run: |
+      #     latest_version=$(git describe --tags --abbrev=0 || echo "v0.0.0")
+      #     echo "latest version detected as $latest_version"
+      #     echo "latest_version=$latest_version" >> $GITHUB_OUTPUT
+
+      # - name: Get commit message
+      #   id: commit_message
+      #   run: |
+      #     last_commit=$(git log -1 --pretty=format:"%s")
+      #     echo "last_commit=$last_commit" >> $GITHUB_OUTPUT
+
+      # - name: Determine update type
+      #   id: release_type
+      #   run: |
+      #     if echo "${{ steps.commit_message.outputs.last_commit }}" | grep -iq "breaking change"; then
+      #       update_type=major
+      #     elif echo "${{ steps.commit_message.outputs.last_commit }}" | grep -iq "^feat:"; then
+      #       update_type=minor
+      #     elif echo "${{ steps.commit_message.outputs.last_commit }}" | grep -iq "^fix:"; then
+      #       update_type=patch
+      #     elif echo "${{ steps.commit_message.outputs.last_commit }}" | grep -iq "^hotfix:"; then
+      #       update_type=patch
+      #     elif echo "${{ steps.commit_message.outputs.last_commit }}" | grep -iq "^refactor:"; then
+      #       update_type=minor
+      #     else
+      #       update_type=none
+      #     fi
+
+      #     echo "release_type=$update_type" >> $GITHUB_OUTPUT
+
+      # - name: Setup semver
+      #   run: |
+      #     npm i -g semver
+      #     echo "Semver setup successfully"
+
+      # - name: Release version
+      #   run: |
+      #     latest_version=${{steps.get_latest_version.outputs.latest_version}}
+      #     release_type=${{steps.release_type.outputs.release_type}}
+
+      #     sanitized_latest_version=$(semver clean $latest_version)
+
+      #     if [[ $release_type == major ]]; then
+      #       release_version=$(semver -i major "$sanitized_latest_version")
+      #     elif [[ $release_type == minor ]]; then
+      #       release_version=$(semver -i minor "$sanitized_latest_version")
+      #     elif [[ $release_type == patch ]]; then
+      #       release_version=$(semver -i patch "$sanitized_latest_version")
+      #     else
+      #       release_version=$sanitized_latest_version
+      #     fi
+
+      #     echo "The release version is $release_version"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      # - name: Get npm cache directory
+      #   id: npm-cache-dir
+      #   shell: bash
+      #   run: echo "dir=$(npm config get cache)" >> $GITHUB_OUTPUT
+
+      # - uses: actions/cache@v4
+      #   id: npm-cache
+      #   with:
+      #     path: ${{ steps.npm-cache-dir.outputs.dir }}
+      #     key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        # if: steps.npm-cache.outputs.cache-hit != 'true'
+        run: |
+          echo "NPM installing"
+          npm install
+
+      - name: Sematic release dry run
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          OUTPUT="$(bash -c "unset GITHUB_ACTIONS && npx semantic-release --dry-run --no-ci --branches main")"
+          echo "----------------------------------------------------------"
+          echo $OUTPUT
+          echo "----------------------------------------------------------"
