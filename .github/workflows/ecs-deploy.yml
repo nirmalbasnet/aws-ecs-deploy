@@ -102,7 +102,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           HEAD_REF: ${{ github.head_ref }}
         run: |
-          OUTPUT="$(bash -c "unset GITHUB_ACTIONS && npx semantic-release --dry-run --no-ci --branches '$HEAD_REF'")"
+          OUTPUT="$(bash -c "unset GITHUB_ACTIONS && npx semantic-release --dry-run --no-ci --branches main")"
           echo "----------------------------------------------------------"
           echo $OUTPUT
           echo "----------------------------------------------------------"
