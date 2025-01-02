@@ -8,101 +8,97 @@ on:
 
 permissions:
   contents: write
+  id-token: write
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+  AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+  AWS_ACCESS_SECRET: ${{ secrets.AWS_ACCESS_SECRET }}
+  AWS_ROLE: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/GitHubActions-Deploy-Role
 
 jobs:
-  build:
-    name: Prepare the version to release
+  release-version:
+    name: Determine relese version and release tag
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      # - name: Get latest image version
-      #   id: get_latest_version
-      #   run: |
-      #     latest_version=$(git describe --tags --abbrev=0 || echo "v0.0.0")
-      #     echo "latest version detected as $latest_version"
-      #     echo "latest_version=$latest_version" >> $GITHUB_OUTPUT
-
-      # - name: Get commit message
-      #   id: commit_message
-      #   run: |
-      #     last_commit=$(git log -1 --pretty=format:"%s")
-      #     echo "last_commit=$last_commit" >> $GITHUB_OUTPUT
-
-      # - name: Determine update type
-      #   id: release_type
-      #   run: |
-      #     if echo "${{ steps.commit_message.outputs.last_commit }}" | grep -iq "breaking change"; then
-      #       update_type=major
-      #     elif echo "${{ steps.commit_message.outputs.last_commit }}" | grep -iq "^feat:"; then
-      #       update_type=minor
-      #     elif echo "${{ steps.commit_message.outputs.last_commit }}" | grep -iq "^fix:"; then
-      #       update_type=patch
-      #     elif echo "${{ steps.commit_message.outputs.last_commit }}" | grep -iq "^hotfix:"; then
-      #       update_type=patch
-      #     elif echo "${{ steps.commit_message.outputs.last_commit }}" | grep -iq "^refactor:"; then
-      #       update_type=minor
-      #     else
-      #       update_type=none
-      #     fi
-
-      #     echo "release_type=$update_type" >> $GITHUB_OUTPUT
-
-      # - name: Setup semver
-      #   run: |
-      #     npm i -g semver
-      #     echo "Semver setup successfully"
-
-      # - name: Release version
-      #   run: |
-      #     latest_version=${{steps.get_latest_version.outputs.latest_version}}
-      #     release_type=${{steps.release_type.outputs.release_type}}
-
-      #     sanitized_latest_version=$(semver clean $latest_version)
-
-      #     if [[ $release_type == major ]]; then
-      #       release_version=$(semver -i major "$sanitized_latest_version")
-      #     elif [[ $release_type == minor ]]; then
-      #       release_version=$(semver -i minor "$sanitized_latest_version")
-      #     elif [[ $release_type == patch ]]; then
-      #       release_version=$(semver -i patch "$sanitized_latest_version")
-      #     else
-      #       release_version=$sanitized_latest_version
-      #     fi
-
-      #     echo "The release version is $release_version"
-
-      - name: Setup Node.js
+      - name: Setup node
         uses: actions/setup-node@v3
         with:
           node-version: 20
 
-      - name: Get npm cache directory
-        id: npm-cache-dir
-        shell: bash
-        run: echo "dir=$(npm config get cache)" >> $GITHUB_OUTPUT
-
-      - uses: actions/cache@v4
+      - name: Cache npm and node modules
         id: npm-cache
+        uses: actions/cache@v4
+        env:
+          cache-dir: $(npm config get cache)
         with:
-          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          path: |
+            node_modules
+            ${{ env.cache-dir }}
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+          restore-keys: ${{ runner.os }}-node
 
-      - name: Install dependencies
-        # if: steps.npm-cache.outputs.cache-hit != 'true'
-        run: |
-          echo "NPM installing"
-          npm install
+      - name: Npm install
+        if: ${{ steps.npm-cache.outputs.cache-hit }} != 'true'
+        run: npm install --frozen-lockfile
 
-      - name: Sematic release dry run
+      - name: Sematic release
+        id: release-version
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           HEAD_REF: ${{ github.head_ref }}
         run: |
-          OUTPUT="$(bash -c "unset GITHUB_ACTIONS && npx semantic-release --dry-run --no-ci --branches main --debug")"
-          echo "----------------------------------------------------------"
-          echo $OUTPUT
-          echo "----------------------------------------------------------"
+          OUTPUT=$(npx semantic-release --dry-run)
+          echo "NEXT_VERSION=$(echo "$OUTPUT" | grep -oPi 'The next release version is \K[0-9]+\.[0-9]+\.[0-9]+')" >> $GITHUB_OUTPUT
+          npx semantic-release
+
+    outputs:
+      expected-release-version: ${{ steps.release-version.outputs.NEXT_VERSION }}
+
+  push-image-to-ecr:
+    name: Push image to ECR
+    runs-on: ubuntu-latest
+    needs: release-version
+    env:
+      version-to-release: ${{ needs.release-version.outputs.expected-release-version }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Configure AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ env.AWS_ROLE }}
+
+      - name: Login to ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push to ECR
+        env:
+          DOCKER_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          REPOSITORY_NAME: aws-ecs-deploy-demo
+          IMAGE_TAG: ${{ env.version-to-release }}
+        run: |
+          echo $DOCKER_REGISTRY
+          docker build -t $REPOSITORY_NAME . 
+          docker tag $DOCKER_REGISTRY/$REPOSITORY_NAME:$IMAGE_TAG
+          docker push $DOCKER_REGISTRY/$REPOSITORY_NAME:$IMAGE_TAG
+
+  ecs-deploy:
+    name: Deploy image to ECS
+    runs-on: ubuntu-latest
+    needs: push-image-to-ecr
+    steps:
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@df9643053eda01f169e64a0e60233aacca83799a
+        with:
+          task-definition: ecs-task-definition.json
+          service: aws-ecs-demo-td
+          cluster: aws-ecs-demo-cluster
+          wait-for-service-stability: true

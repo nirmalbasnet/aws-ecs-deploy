@@ -1,0 +1,21 @@
+{
+  "containerDefinitions": [
+    {
+      "name": "aws-ecs-demo-container",
+      "image": "827040639836.dkr.ecr.ap-south-1.amazonaws.com/aws-ecs-deploy-demo:latest",
+      "cpu": 512,
+      "memory": 1024,
+      "portMappings": [
+        {
+          "name": "aws-ecs-demo-container-80-tcp",
+          "containerPort": 80,
+          "hostPort": 80,
+          "protocol": "tcp",
+          "appProtocol": "http"
+        }
+      ],
+      "essential": true
+    }
+  ],
+  "family": "aws-ecs-demo-td"
+}
