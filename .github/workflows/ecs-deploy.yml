@@ -78,18 +78,18 @@ jobs:
         with:
           node-version: 20
 
-      # - name: Get npm cache directory
-      #   id: npm-cache-dir
-      #   shell: bash
-      #   run: echo "dir=$(npm config get cache)" >> $GITHUB_OUTPUT
+      - name: Get npm cache directory
+        id: npm-cache-dir
+        shell: bash
+        run: echo "dir=$(npm config get cache)" >> $GITHUB_OUTPUT
 
-      # - uses: actions/cache@v4
-      #   id: npm-cache
-      #   with:
-      #     path: ${{ steps.npm-cache-dir.outputs.dir }}
-      #     key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-node-
+      - uses: actions/cache@v4
+        id: npm-cache
+        with:
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
       - name: Install dependencies
         # if: steps.npm-cache.outputs.cache-hit != 'true'
@@ -102,7 +102,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           HEAD_REF: ${{ github.head_ref }}
         run: |
-          OUTPUT="$(bash -c "unset GITHUB_ACTIONS && npx semantic-release --dry-run --no-ci --branches main")"
+          OUTPUT="$(bash -c "unset GITHUB_ACTIONS && npx semantic-release --dry-run --no-ci --branches '$HEAD_REF'")"
           echo "----------------------------------------------------------"
           echo $OUTPUT
           echo "----------------------------------------------------------"
