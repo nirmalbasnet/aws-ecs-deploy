@@ -94,6 +94,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: push-image-to-ecr
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@df9643053eda01f169e64a0e60233aacca83799a
         with:
