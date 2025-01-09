@@ -52,10 +52,8 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           HEAD_REF: ${{ github.ref_name }}
         run: |
-          OUTPUT="$(bash -c "unset GITHUB_ACTIONS && npx semantic-release --dry-run --no-ci --branches $HEAD_REF")"
-          echo '----------------------------------------------------------------------------------------------'
-          echo "$OUTPUT"
-          # echo "NEXT_VERSION=$(echo "$OUTPUT" | grep -oPi 'The next release version is \K[0-9]+\.[0-9]+\.[0-9]+')" >> $GITHUB_OUTPUT
+          OUTPUT="$(bash -c "unset GITHUB_ACTIONS && gti fetch --tags && npx semantic-release --dry-run --no-ci --branches $HEAD_REF")"
+          echo "NEXT_VERSION=$(echo "$OUTPUT" | grep -oPi 'The next release version is \K[0-9]+\.[0-9]+\.[0-9]+')" >> $GITHUB_OUTPUT
 
     outputs:
       expected-release-version: ${{ steps.release-version.outputs.NEXT_VERSION }}
@@ -69,9 +67,6 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
-
-      - name: Echo
-        run: echo "############################# ${{ env.version-to-release }}"
 
       - name: Configure AWS
         uses: aws-actions/configure-aws-credentials@v4
@@ -103,6 +98,6 @@ jobs:
         uses: aws-actions/amazon-ecs-deploy-task-definition@df9643053eda01f169e64a0e60233aacca83799a
         with:
           task-definition: ecs-task-definition.json
-          service: aws-ecs-demo-td
+          service: aws-ecs-demo-service
           cluster: aws-ecs-demo-cluster
           wait-for-service-stability: true

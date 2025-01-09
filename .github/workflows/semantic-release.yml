@@ -1,0 +1,26 @@
+name: Semantic Release
+
+on:
+  workflow_run:
+    workflows: ["Build and deploy to ECS"]
+    types:
+      - completed
+  workflow_dispatch:
+  push:
+    branches: main
+
+permissions:
+  contents: write
+
+jobs:
+  semantic-release:
+    name: Trigger semantic release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Semantic release
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: npx semantic-release
