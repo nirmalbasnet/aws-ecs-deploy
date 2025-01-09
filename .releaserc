@@ -1,7 +1,7 @@
 branches:
   - main
 
-repositoryUrl: "https://github.com/nirmalbasnet/aws-ecs-deploy"
+"repositoryUrl": "git@github.com:nirmalbasnet/aws-ecs-deploy.git"
 
 plugins:
   - "@semantic-release/commit-analyzer"
