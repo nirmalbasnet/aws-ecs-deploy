@@ -87,6 +87,7 @@ jobs:
           echo $DOCKER_REGISTRY
           docker build -t $REPOSITORY_NAME . 
           docker tag $DOCKER_REGISTRY/$REPOSITORY_NAME:$IMAGE_TAG
+          docker tag $REPOSITORY_NAME:$IMAGE_TAG $DOCKER_REGISTRY/$REPOSITORY_NAME:$IMAGE_TAG
           docker push $DOCKER_REGISTRY/$REPOSITORY_NAME:$IMAGE_TAG
 
   ecs-deploy:
@@ -105,7 +106,11 @@ jobs:
   sematic-release:
     name: Actual sematic release
     runs-on: ubuntu-latest
+    needs: ecs-deploy
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
       - name: Sematic release dry run
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
