@@ -65,7 +65,11 @@ jobs:
     steps:
       - name: Echo the release version
         run: |
-          if [${{ needs.semantic-release.outputs.expected-release-version }} != '']; then
+          echo "FIRST"
+          echo $(${{ needs.semantic-release.outputs.expected-release-version }} != '') 
+          echo "SECOND"
+          echo $(${{ needs.semantic-release.outputs.expected-release-version }} != ' ') 
+          if [ ${{ needs.semantic-release.outputs.expected-release-version }} != '' ]; then
             echo "The version ${{ needs.semantic-release.outputs.expected-release-version }} is getting deployed now"
           else
             echo "Skipping release since the changes made do not need to get released"
