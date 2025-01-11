@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/nirmalbasnet/aws-ecs-deploy/compare/v1.1.1...v1.2.0) (2025-01-11)
+
+
+### Features
+
+* deploy pushed image to ECS ([f7ca0cf](https://github.com/nirmalbasnet/aws-ecs-deploy/commit/f7ca0cf2326164e08ad16a86d6740ba9a6d7e8b2))
+
 ## [1.1.1](https://github.com/nirmalbasnet/aws-ecs-deploy/compare/v1.1.0...v1.1.1) (2025-01-11)
 
 
