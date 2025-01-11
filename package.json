@@ -1,10 +1,9 @@
 {
-  "name": "aws-managed-cicd",
+  "name": "aws-ecs-deploy",
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start": "parcel index.html",
-    "build": "parcel build index.html"
+    "build": "parcel build src/index.html"
   },
   "keywords": [],
   "author": "",

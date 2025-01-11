@@ -5,6 +5,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "src/**"
 
 permissions:
   contents: write
@@ -100,7 +102,7 @@ jobs:
           docker push $DOCKER_REGISTRY/$REPOSITORY_NAME:$IMAGE_TAG
           echo "IMAGE=$DOCKER_REGISTRY/$REPOSITORY_NAME:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
-      - name: TEST
+      - name: TEST IMAGE
         run: echo ${{ steps.push-image.outputs.IMAGE }}
 
     outputs:
