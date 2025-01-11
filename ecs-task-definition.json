@@ -1,4 +1,5 @@
 {
+  "executionRoleArn": "arn:aws:iam::827040639836:role/ecsTaskExecutionRole",
   "family": "aws-ecs-deploy-family",
   "containerDefinitions": [
     {
