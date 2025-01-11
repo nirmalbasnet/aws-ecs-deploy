@@ -100,7 +100,7 @@ jobs:
           docker build -t $REPOSITORY_NAME:$IMAGE_TAG .
           docker tag $REPOSITORY_NAME:$IMAGE_TAG $DOCKER_REGISTRY/$REPOSITORY_NAME:$IMAGE_TAG
           docker push $DOCKER_REGISTRY/$REPOSITORY_NAME:$IMAGE_TAG
-          echo "IMAGE=$(echo "$DOCKER_REGISTRY/$REPOSITORY_NAME:$IMAGE_TAG")" >> $GITHUB_OUTPUT
+          echo "IMAGE=$DOCKER_REGISTRY/$REPOSITORY_NAME:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
       - name: TEST IMAGE
         run: echo ${{ steps.push-image.outputs.IMAGE }}
@@ -117,7 +117,7 @@ jobs:
     steps:
       - name: Print image being deployed
         run: |
-          echo "--------------------------- ${{ needs.push-image-to-ecr.outputs.VERSIONED_IMAGE }} ---------------------"
+          echo "--------------------------- ${{ needs.push-image-to-ecr.outputs }} ---------------------"
           echo "--------------------------- ${{ env.IMAGE }} ---------------------"
 
       - name: Checkout repo
