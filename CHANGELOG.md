@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/nirmalbasnet/aws-ecs-deploy/compare/v1.1.0...v1.1.1) (2025-01-11)
+
+
+### Bug Fixes
+
+* page title ([6739cda](https://github.com/nirmalbasnet/aws-ecs-deploy/commit/6739cdaae00cc5061d92b98d5495975ec1b1b9fc))
+
 # [1.1.0](https://github.com/nirmalbasnet/aws-ecs-deploy/compare/v1.0.1...v1.1.0) (2025-01-11)
 
 
