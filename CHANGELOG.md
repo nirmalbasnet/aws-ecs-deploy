@@ -1,3 +1,10 @@
+## [1.2.8](https://github.com/nirmalbasnet/aws-ecs-deploy/compare/v1.2.7...v1.2.8) (2025-01-11)
+
+
+### Bug Fixes
+
+* trigger workflow dikka ([4aad04c](https://github.com/nirmalbasnet/aws-ecs-deploy/commit/4aad04c588ba862a9e7e360eb360a71ce4f17776))
+
 ## [1.2.7](https://github.com/nirmalbasnet/aws-ecs-deploy/compare/v1.2.6...v1.2.7) (2025-01-11)
 
 
