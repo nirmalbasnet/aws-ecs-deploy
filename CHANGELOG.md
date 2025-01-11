@@ -1,3 +1,10 @@
+## [1.2.12](https://github.com/nirmalbasnet/aws-ecs-deploy/compare/v1.2.11...v1.2.12) (2025-01-11)
+
+
+### Bug Fixes
+
+* added task execution role in task definition json ([cfab7e7](https://github.com/nirmalbasnet/aws-ecs-deploy/commit/cfab7e711f32838b392420332b607c02a7c531fd))
+
 ## [1.2.11](https://github.com/nirmalbasnet/aws-ecs-deploy/compare/v1.2.10...v1.2.11) (2025-01-11)
 
 
