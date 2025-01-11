@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/nirmalbasnet/aws-ecs-deploy/compare/v1.0.0...v1.0.1) (2025-01-11)
+
+
+### Bug Fixes
+
+* button label ([311092f](https://github.com/nirmalbasnet/aws-ecs-deploy/commit/311092fc953ae6c82eeb4d77524303adb0a32905))
+
 # 1.0.0 (2025-01-11)
 
 
