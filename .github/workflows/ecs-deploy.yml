@@ -18,8 +18,8 @@ env:
   AWS_ROLE: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/GitHubActions-Deploy-Role
 
 jobs:
-  release-version:
-    name: Determine relese version and release tag
+  semantic-release:
+    name: Execute semantic release
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
@@ -46,81 +46,93 @@ jobs:
         if: ${{ steps.npm-cache.outputs.cache-hit }} != 'true'
         run: npm install --frozen-lockfile
 
-      - name: Sematic release dry run
+      - name: Sematic release
         id: release-version
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           HEAD_REF: ${{ github.ref_name }}
         run: |
-          OUTPUT="$(bash -c "unset GITHUB_ACTIONS && npx semantic-release --dry-run --no-ci --branches $HEAD_REF")"
+          OUTPUT="$(npx semantic-release --branches $HEAD_REF)"
+          echo "#################################"
+          echo "$OUTPUT"
           echo "NEXT_VERSION=$(echo "$OUTPUT" | grep -oPi 'The next release version is \K[0-9]+\.[0-9]+\.[0-9]+')" >> $GITHUB_OUTPUT
 
     outputs:
       expected-release-version: ${{ steps.release-version.outputs.NEXT_VERSION }}
 
-  push-image-to-ecr:
-    name: Push image to ECR
+  echo-expected-version:
+    name: Echo the expected image version
     runs-on: ubuntu-latest
-    needs: release-version
-    env:
-      version-to-release: ${{ needs.release-version.outputs.expected-release-version }}
+    needs: semantic-release
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
-
-      - name: Configure AWS
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ${{ env.AWS_REGION }}
-          role-to-assume: ${{ env.AWS_ROLE }}
-
-      - name: Login to ECR
-        id: ecr-login
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Build, tag, and push to ECR
-        env:
-          DOCKER_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
-          REPOSITORY_NAME: aws-ecs-deploy-demo
-          IMAGE_TAG: ${{ env.version-to-release }}
+      - name: Echo the version
         run: |
-          echo $DOCKER_REGISTRY
-          docker build -t $REPOSITORY_NAME:$IMAGE_TAG . 
-          docker tag $REPOSITORY_NAME:$IMAGE_TAG $DOCKER_REGISTRY/$REPOSITORY_NAME:$IMAGE_TAG
-          docker push $DOCKER_REGISTRY/$REPOSITORY_NAME:$IMAGE_TAG
+          echo "###################################" 
+          echo ${{ needs.semantic-release.outputs.expected-release-version  }}
 
-  ecs-deploy:
-    name: Deploy image to ECS
-    runs-on: ubuntu-latest
-    needs: push-image-to-ecr
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+  # push-image-to-ecr:
+  #   name: Push image to ECR
+  #   runs-on: ubuntu-latest
+  #   needs: release-version
+  #   env:
+  #     version-to-release: ${{ needs.release-version.outputs.expected-release-version }}
+  #   steps:
+  #     - name: Checkout repo
+  #       uses: actions/checkout@v3
 
-      - name: Configure AWS
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ${{ env.AWS_REGION }}
-          role-to-assume: ${{ env.AWS_ROLE }}
+  #     - name: Configure AWS
+  #       uses: aws-actions/configure-aws-credentials@v4
+  #       with:
+  #         aws-region: ${{ env.AWS_REGION }}
+  #         role-to-assume: ${{ env.AWS_ROLE }}
 
-      - name: Deploy Amazon ECS task definition
-        uses: aws-actions/amazon-ecs-deploy-task-definition@df9643053eda01f169e64a0e60233aacca83799a
-        with:
-          task-definition: ecs-task-definition.json
-          service: aws-ecs-demo-service
-          cluster: aws-ecs-demo-cluster
-          wait-for-service-stability: true
+  #     - name: Login to ECR
+  #       id: ecr-login
+  #       uses: aws-actions/amazon-ecr-login@v2
 
-  sematic-release:
-    name: Actual sematic release
-    runs-on: ubuntu-latest
-    needs: ecs-deploy
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+  #     - name: Build, tag, and push to ECR
+  #       env:
+  #         DOCKER_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+  #         REPOSITORY_NAME: aws-ecs-deploy-demo
+  #         IMAGE_TAG: ${{ env.version-to-release }}
+  #       run: |
+  #         echo $DOCKER_REGISTRY
+  #         docker build -t $REPOSITORY_NAME:$IMAGE_TAG .
+  #         docker tag $REPOSITORY_NAME:$IMAGE_TAG $DOCKER_REGISTRY/$REPOSITORY_NAME:$IMAGE_TAG
+  #         docker push $DOCKER_REGISTRY/$REPOSITORY_NAME:$IMAGE_TAG
 
-      - name: Sematic release dry run
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-          HEAD_REF: ${{ github.ref_name }}
-        run: npx semantic-release
+  # ecs-deploy:
+  #   name: Deploy image to ECS
+  #   runs-on: ubuntu-latest
+  #   needs: push-image-to-ecr
+  #   steps:
+  #     - name: Checkout repo
+  #       uses: actions/checkout@v3
+
+  #     - name: Configure AWS
+  #       uses: aws-actions/configure-aws-credentials@v4
+  #       with:
+  #         aws-region: ${{ env.AWS_REGION }}
+  #         role-to-assume: ${{ env.AWS_ROLE }}
+
+  #     - name: Deploy Amazon ECS task definition
+  #       uses: aws-actions/amazon-ecs-deploy-task-definition@df9643053eda01f169e64a0e60233aacca83799a
+  #       with:
+  #         task-definition: ecs-task-definition.json
+  #         service: aws-ecs-demo-service
+  #         cluster: aws-ecs-demo-cluster
+  #         wait-for-service-stability: true
+
+  # sematic-release:
+  #   name: Actual sematic release
+  #   runs-on: ubuntu-latest
+  #   needs: ecs-deploy
+  #   steps:
+  #     - name: Checkout repo
+  #       uses: actions/checkout@v3
+
+  #     - name: Sematic release dry run
+  #       env:
+  #         GH_TOKEN: ${{ secrets.GH_TOKEN }}
+  #         HEAD_REF: ${{ github.ref_name }}
+  #       run: npx semantic-release

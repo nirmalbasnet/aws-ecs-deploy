@@ -1,10 +1,10 @@
 {
+  "family": "aws-ecs-deploy-family",
   "containerDefinitions": [
     {
       "name": "aws-ecs-demo-container",
-      "image": "827040639836.dkr.ecr.ap-south-1.amazonaws.com/aws-ecs-deploy-demo:latest",
-      "cpu": 512,
-      "memory": 1024,
+      "image": "827040639836.dkr.ecr.ap-south-1.amazonaws.com/aws-ecs-deploy-demo:1.0.0",
+      "cpu": 0,
       "portMappings": [
         {
           "name": "aws-ecs-demo-container-80-tcp",
@@ -14,8 +14,23 @@
           "appProtocol": "http"
         }
       ],
-      "essential": true
+      "essential": true,
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/aws-ecs-deploy-family",
+          "awslogs-region": "ap-south-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
     }
   ],
-  "family": "aws-ecs-demo-td"
+  "cpu": "512",
+  "memory": "1024",
+  "requiresCompatibilities": ["FARGATE"],
+  "networkMode": "awsvpc",
+  "runtimePlatform": {
+    "cpuArchitecture": "X86_64",
+    "operatingSystemFamily": "LINUX"
+  }
 }

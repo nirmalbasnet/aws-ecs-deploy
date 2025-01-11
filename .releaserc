@@ -3,6 +3,9 @@ branches:
 
 "repositoryUrl": "git@github.com:nirmalbasnet/aws-ecs-deploy.git"
 
+debug: true
+ci: true
+
 plugins:
   - "@semantic-release/commit-analyzer"
   - "@semantic-release/release-notes-generator"
