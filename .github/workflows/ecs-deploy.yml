@@ -67,7 +67,7 @@ jobs:
         run: echo "The version ${{ needs.semantic-release.outputs.expected-release-version }} is getting deployed now"
 
   push-image-to-ecr:
-    name: Push image to ECR
+    name: Push image to Elastic Container Reistry
     runs-on: ubuntu-latest
     needs: semantic-release
     if: ${{ needs.semantic-release.outputs.expected-release-version }} != ''
