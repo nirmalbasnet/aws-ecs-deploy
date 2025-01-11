@@ -104,6 +104,7 @@ jobs:
           docker tag $REPOSITORY_NAME:$IMAGE_TAG $DOCKER_REGISTRY/$REPOSITORY_NAME:$IMAGE_TAG
           docker push $DOCKER_REGISTRY/$REPOSITORY_NAME:$IMAGE_TAG
           echo "IMAGE=$DOCKER_REGISTRY/$REPOSITORY_NAME:$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "--------------------------- $DOCKER_REGISTRY/$REPOSITORY_NAME:$IMAGE_TAG ---------------------"
 
     outputs:
       IMAGE: ${{ steps.push-image.outputs.IMAGE }}
@@ -113,8 +114,13 @@ jobs:
     runs-on: ubuntu-latest
     needs: push-image-to-ecr
     env:
-      image: ${{ needs.push-image-to-ecr.outputs.IMAGE }}
+      IMAGE: ${{ needs.push-image-to-ecr.outputs.IMAGE }}
     steps:
+      - name: Print image being deployed
+        run: |
+          echo "--------------------------- ${{ needs.push-image-to-ecr.outputs.IMAGE }} ---------------------"
+          echo "--------------------------- ${{ env.IMAGE }} ---------------------"
+
       - name: Checkout repo
         uses: actions/checkout@v3
 
@@ -130,7 +136,7 @@ jobs:
         with:
           task-definition: ecs-task-definition.json
           container-name: aws-ecs-deploy-container
-          image: ${{ env.image }}
+          image: ${{ env.IMAGE }}
 
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
