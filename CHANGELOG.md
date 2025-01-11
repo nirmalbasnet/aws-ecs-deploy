@@ -1,3 +1,10 @@
+## [1.2.13](https://github.com/nirmalbasnet/aws-ecs-deploy/compare/v1.2.12...v1.2.13) (2025-01-11)
+
+
+### Bug Fixes
+
+* it will pass for sure ([0f1f026](https://github.com/nirmalbasnet/aws-ecs-deploy/commit/0f1f026f551a22271039c0c7c4039ecfa0ad559d))
+
 ## [1.2.12](https://github.com/nirmalbasnet/aws-ecs-deploy/compare/v1.2.11...v1.2.12) (2025-01-11)
 
 
