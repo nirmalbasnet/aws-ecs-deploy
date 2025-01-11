@@ -117,7 +117,7 @@ jobs:
     steps:
       - name: Print image being deployed
         run: |
-          echo "--------------------------- ${{ needs.push-image-to-ecr.outputs }} ---------------------"
+          echo "--------------------------- ${{ toJson(needs.push-image-to-ecr.outputs) }} ---------------------"
           echo "--------------------------- ${{ env.IMAGE }} ---------------------"
 
       - name: Checkout repo
