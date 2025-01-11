@@ -64,7 +64,12 @@ jobs:
     needs: semantic-release
     steps:
       - name: Echo the release version
-        run: echo "The version ${{ needs.semantic-release.outputs.expected-release-version }} is getting deployed now"
+        run: |
+          if [${{ needs.semantic-release.outputs.expected-release-version }} != '']; then
+            echo "The version ${{ needs.semantic-release.outputs.expected-release-version }} is getting deployed now"
+          else
+            echo "Skipping release since the changes made do not need to get released"
+          fi
 
   push-image-to-ecr:
     name: Push image to Elastic Container Reistry
