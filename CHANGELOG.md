@@ -1,3 +1,10 @@
+## [1.2.11](https://github.com/nirmalbasnet/aws-ecs-deploy/compare/v1.2.10...v1.2.11) (2025-01-11)
+
+
+### Bug Fixes
+
+* worflow issue with image version to deploy ([ad1299d](https://github.com/nirmalbasnet/aws-ecs-deploy/commit/ad1299d4a4ae5f8d5a7637910042203150c8c145))
+
 ## [1.2.10](https://github.com/nirmalbasnet/aws-ecs-deploy/compare/v1.2.9...v1.2.10) (2025-01-11)
 
 
