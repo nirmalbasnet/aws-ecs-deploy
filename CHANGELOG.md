@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/nirmalbasnet/aws-ecs-deploy/compare/v1.0.1...v1.1.0) (2025-01-11)
+
+
+### Features
+
+* push image to ECR ([67aa487](https://github.com/nirmalbasnet/aws-ecs-deploy/commit/67aa48758629384960be48bc1587fb278cb3c9c9))
+
 ## [1.0.1](https://github.com/nirmalbasnet/aws-ecs-deploy/compare/v1.0.0...v1.0.1) (2025-01-11)
 
 
