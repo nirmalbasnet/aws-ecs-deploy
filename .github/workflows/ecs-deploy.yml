@@ -106,18 +106,18 @@ jobs:
         run: echo ${{ steps.push-image.outputs.IMAGE }}
 
     outputs:
-      IMAGE: ${{ steps.push-image.outputs.IMAGE }}
+      VERSIONED_IMAGE: ${{ steps.push-image.outputs.IMAGE }}
 
   ecs-deploy:
     name: Deploy image to ECS
     runs-on: ubuntu-latest
     needs: push-image-to-ecr
     env:
-      IMAGE: ${{ needs.push-image-to-ecr.outputs.IMAGE }}
+      IMAGE: ${{ needs.push-image-to-ecr.outputs.VERSIONED_IMAGE }}
     steps:
       - name: Print image being deployed
         run: |
-          echo "--------------------------- ${{ needs.push-image-to-ecr.outputs.IMAGE }} ---------------------"
+          echo "--------------------------- ${{ needs.push-image-to-ecr.outputs.VERSIONED_IMAGE }} ---------------------"
           echo "--------------------------- ${{ env.IMAGE }} ---------------------"
 
       - name: Checkout repo
